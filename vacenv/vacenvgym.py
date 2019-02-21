@@ -12,10 +12,13 @@ class VacEnvironment(gym.Env):
 
         self.obj = Environment()
         self.score = 0.0
-        self.state = np.zeros(9, dtype=np.double)
+
         self.dt = 1/20
         self.action_space = spaces.Discrete(5)
-        self.observation_space = spaces.Box( np.array([0,-1,-1,-1,-1,-1,0,0,0]), np.array([+1,+1,+1,+1,+1,+1,+1,+1,+1]), dtype=np.float32)
+        self.observation_space = spaces.Box(np.array([0,-1,-1,-1,-1,-1,0,0,0]), np.array([+1,+1,+1,+1,+1,+1,+1,+1,+1]),
+                                            dtype=np.double)
+
+        self.states = np.array([0,0,0,0,0,0,0,0,0],  dtype=np.double)
 
     def step(self, action):
         """
@@ -46,21 +49,24 @@ class VacEnvironment(gym.Env):
                  However, official evaluations of your agent are not allowed to
                  use this for learning.
         """
-        self.state = self.obj.step(action, self.dt)
+        self.states = self.obj.step(action, self.dt)
         newScore = self.obj.score()
-        reward = newScore - self.score
+        reward = (newScore - self.score) * 1000
         self.score = newScore
 
-        ob = self.state
+        ob = self.states
         episode_over = not self.obj.running()
+        if episode_over :
+            reward = -5
         info = {'score': self.score}
         return ob, reward, episode_over, info
 
     def reset(self):
         self.obj.reset()
         self.score = 0.0
-        self.state = np.zeros(9, dtype=np.double)
+        self.states = np.array([0,0,0,0,0,0,0,0,0],  dtype=np.double)
         self.dt = 1/20
+        return self.states
 
     def render(self, mode='human'):
         pass

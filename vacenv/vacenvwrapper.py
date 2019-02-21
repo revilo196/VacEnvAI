@@ -3,6 +3,7 @@ import ctypes
 import numpy as np
 
 lib = cdll.LoadLibrary('./vacenv/libVacEnvS.dll')
+lib.VacEnv_new.restype = ctypes.c_void_p
 
 
 class Environment(object):
@@ -28,7 +29,7 @@ class Environment(object):
         lib.VacEnv_world.argtypes = [ctypes.c_void_p]
         lib.VacEnv_world.restype = ctypes.c_void_p
 
-        self.obj = lib.VacEnv_new()
+        self.obj = None
 
     def score(self):
         if self.obj:
@@ -50,15 +51,17 @@ class Environment(object):
 
     def step(self, value, dt):
         if self.obj:
-            a = np.zeros(9, dtype=np.double)
+            a = np.zeros((9,), dtype=np.double)
             lib.VacEnv_step(self.obj, value, dt, a.ctypes.data_as(ctypes.c_void_p))
             return a
         else:
-            return np.zeros(9, dtype=np.double)
+            return np.zeros((9,), dtype=np.double)
 
     def reset(self):
         if self.obj:
             lib.VacEnv_reset(self.obj)
+        else:
+            self.obj = lib.VacEnv_new()
 
     def __del__(self):
         if self.obj:
