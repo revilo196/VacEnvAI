@@ -9,7 +9,7 @@ from stable_baselines.common.vec_env import DummyVecEnv
 
 if __name__ == '__main__':
     env = vacenv.VacEnvironment()
-    # env.reset()
+    env.reset()
     env_dummy = DummyVecEnv([lambda: env])
 
     # setup Window
